@@ -176,6 +176,12 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        Ant\Profile\ServiceProvider::class,
+        Ant\Payment\ServiceProvider::class,
+        Ant\Subscription\ServiceProvider::class,
+        Ant\Member\ServiceProvider::class,
+
+        Addons\User\Providers\AddonServiceProvider::class,
     ],
 
     /*

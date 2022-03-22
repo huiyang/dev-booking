@@ -10,6 +10,8 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
+    use \Ant\Member\Traits\IsMember;
+    use \Ant\Profile\Traits\HasProfile;
 
     /**
      * The attributes that are mass assignable.

@@ -57,6 +57,7 @@
         "vemcogroup/laravel-sparkpost-driver": "^4.0"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.6",
         "facade/ignition": "^2.5",
         "fzaninotto/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
@@ -77,6 +78,8 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
+            "Ant\\": "modules/",
+            "Addons\\User\\": "addons/User/src",
             "Database\\Factories\\": "database/factories",
             "Database\\Seeders\\": "database/seeders"
         }
