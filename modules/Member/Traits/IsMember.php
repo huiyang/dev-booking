@@ -35,7 +35,7 @@
 
     public function getMembershipExpireAtAttribute() {
       $subscription = $this->getLastExpireAndActiveAndPaidSubscription($this->subscriptionIdentity);
-
+		
   		if (isset($subscription)) {
   			return $subscription->expire_at;
   		} else if ($subscription = $this->getLastExpireAndPaidSubscription($this->subscriptionIdentity)) {
@@ -47,6 +47,12 @@
       ->paidOnly()
       ->latest('expire_at')
       ->value('expire_at');*/
+    }
+	
+	public function getFormattedMembershipExpireAtAttribute() {
+		$date = $this->getMembershipExpireAtAttribute();
+		$date = !empty($date) ? Carbon::parse($date)->toDateString() : "";
+		return $date;
     }
 
     protected function getLastExpireAndActiveAndPaidSubscription() {
@@ -64,8 +70,8 @@
   			->latest('expire_at')
   			->first();
   	}
-
-    public function subscribeMembershipPackage($subscriptionPackageId) {
+	
+	public function subscribeMembershipPackage($subscriptionPackageId) {
   			$package = SubscriptionPackage::find($subscriptionPackageId);
 
   			if (!isset($package)) throw new \Exception('Package "'.$subscriptionPackageId.'" does not exist. ');

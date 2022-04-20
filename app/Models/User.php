@@ -23,6 +23,12 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+	
+	protected $appends = [
+        'isMember',
+		// 'membershipExpireAt'
+		'formattedMembershipExpireAt'
+    ];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -40,6 +46,6 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
+        'email_verified_at' => 'datetime:Y-m-d H:i:s',
     ];
 }

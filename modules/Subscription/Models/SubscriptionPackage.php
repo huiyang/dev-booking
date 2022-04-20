@@ -73,7 +73,7 @@ class SubscriptionPackage extends Model
         'bundle_id' => $bundle->id,
         'priority' => 0
       ]);
-
+		
       //Create invoice
       UserSubscribes::dispatch($bundle, $this, $user);
 

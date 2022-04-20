@@ -44,7 +44,7 @@
                     <template slot="membership" slot-scope="table">
                         <div v-if="table.record.isMember">
                             <span class="badge badge-success">Member</span>
-                            <p>Expire at {{ table.record.membershipExpireAt }}</p>
+                            <p>Expire at {{ table.record.formattedMembershipExpireAt }}</p>
                         </div>
                         <div v-else >
                             <span class="badge">Non Member</span>
@@ -58,7 +58,7 @@
                     <template slot="actions" slot-scope="table">
                         <ui-actions :id="'user_' + table.record.id + '_actions'" :key="'user_' + table.record.id + '_actions'">
                             <ui-dropdown-link @click.prevent :to="{ name: 'users.edit', params: {user: table.record.id} }">Edit</ui-dropdown-link>
-
+							<ui-dropdown-link @click.prevent :to="{ name: 'user-list.sub', params: {id: table.record.id} }">Subscription</ui-dropdown-link>
                             <!-- <ui-dropdown-link
                                 v-if="table.record.id != user.id"
                                 @click.prevent
