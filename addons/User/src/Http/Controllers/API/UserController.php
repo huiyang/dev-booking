@@ -8,10 +8,8 @@ use App\Models\User;
 use Fusion\Events\UserDeleted;
 use Fusion\Http\Resources\UserResource;
 use Fusion\Http\Requests\UserRequest;
-use Ant\Subscription\Models\SubscriptionPackage;
 
 class UserController extends Controller {
-	
     public function index(Request $request, User $user) {
         return [
             'user' => $user,
@@ -25,19 +23,6 @@ class UserController extends Controller {
                 'data.interest' => 'Interest 兴趣',
                 'data.readingPreference' => 'Reading Preference 想阅读的书类',
             ],
-        ];
-    }
-	
-	public function subscription(Request $request, User $user) {
-		
-		$sub = SubscriptionPackage::with('subscriptionItems')->get();
-		$user->isMember = $user->isMember();
-		$user->memberExpiryDate = date( 'Y-m-d H:i:s', strtotime( $user->getMembershipExpireAtAttribute() ));
-		
-        return [
-            'user' => $user,
-            'tabs' => UserPage::getTabs(),
-            'subs' => $sub,
         ];
     }
     
@@ -135,10 +120,4 @@ class UserController extends Controller {
 
         $user->delete();
     }
-	
-	public function extendSubcription(Request $request, User $user)
-	{
-		$bundle = $user->subscribeMembershipPackage( $request->packageid );
-		$bundle->markAsPaid();
-	}
 }

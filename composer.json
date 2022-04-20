@@ -80,6 +80,7 @@
             "App\\": "app/",
             "Ant\\": "modules/",
             "Addons\\User\\": "addons/User/src",
+            "Addons\\Subscription\\": "addons/Subscription/src",
             "Database\\Factories\\": "database/factories",
             "Database\\Seeders\\": "database/seeders"
         }

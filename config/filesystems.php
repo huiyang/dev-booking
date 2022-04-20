@@ -68,6 +68,7 @@ return [
     'links' => [
         public_path('storage') => storage_path('app/public'),
         public_path('addons/User') => base_path('addons/User/public'),
+        public_path('addons/Subscription') => base_path('addons/Subscription/public'),
     ],
 
 ];

@@ -182,6 +182,7 @@ return [
         Ant\Member\ServiceProvider::class,
 
         Addons\User\Providers\AddonServiceProvider::class,
+        Addons\Subscription\Providers\AddonServiceProvider::class,
     ],
 
     /*

@@ -14,6 +14,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('admin/user-list', 'UserController@index');
-Route::get('admin/user-list/{user}', 'UserController@index');
-Route::apiResource('users', 'UserController');
+Route::get('admin/user-list/{user}/sub', 'SubscriptionController@subscription')->name('user-list.sub');
+Route::put('admin/user-list/{user}', 'SubscriptionController@extendSubcription');
