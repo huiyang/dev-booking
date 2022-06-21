@@ -180,9 +180,11 @@ return [
         Ant\Payment\ServiceProvider::class,
         Ant\Subscription\ServiceProvider::class,
         Ant\Member\ServiceProvider::class,
+        Ant\Booking\ServiceProvider::class,
 
         Addons\User\Providers\AddonServiceProvider::class,
         Addons\Subscription\Providers\AddonServiceProvider::class,
+        Addons\Booking\Providers\AddonServiceProvider::class,
     ],
 
     /*

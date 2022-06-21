@@ -69,6 +69,7 @@ return [
         public_path('storage') => storage_path('app/public'),
         public_path('addons/User') => base_path('addons/User/public'),
         public_path('addons/Subscription') => base_path('addons/Subscription/public'),
+        public_path('addons/Booking') => base_path('addons/Booking/public'),
     ],
 
 ];
