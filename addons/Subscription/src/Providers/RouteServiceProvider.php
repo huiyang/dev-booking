@@ -51,7 +51,7 @@ class RouteServiceProvider extends ServiceProvider
             'middleware' => 'web',
             'namespace'  => $this->namespace . '\Web',
         ], function ($router) {
-            require addon_path('Subscription/routes/web.php');
+            require base_path('addons/Subscription/routes/web.php');
         });
     }
 
@@ -69,7 +69,7 @@ class RouteServiceProvider extends ServiceProvider
             'namespace'  => $this->namespace . '\API',
             'prefix'     => 'api',
         ], function ($router) {
-            require addon_path('Subscription/routes/api.php');
+            require base_path('addons/Subscription/routes/api.php');
         });
     }
 
@@ -87,7 +87,7 @@ class RouteServiceProvider extends ServiceProvider
             'namespace'  => $this->namespace . '\DataTable',
             'prefix'     => 'datatable',
         ], function ($router) {
-            require addon_path('Subscription/routes/datatable.php');
+            require base_path('addons/Subscription/routes/datatable.php');
         });
     }
 }
