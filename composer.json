@@ -51,6 +51,7 @@
         "fusioncms/cms": "dev-nightly-antweb",
         "guzzlehttp/guzzle": "^7.0.1",
         "guzzlehttp/oauth-subscriber": "^0.5",
+        "laraditz/shopee": "dev-antweb",
         "laravel/framework": "^8.20",
         "laravel/tinker": "^2.5",
         "predis/predis": "^1.1",
@@ -74,6 +75,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/antwebstudio/laravel-bookings"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/antwebstudio/shopee-v2"
         }
 	],
     "config": {

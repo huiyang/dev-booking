@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers;
+namespace Ant\Shopee\Providers;
 
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -16,12 +16,12 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         // TODO: disable this
+        \Laraditz\Shopee\Events\WebhookReceived::class => [
+            \Ant\Shopee\Listeners\WebhookListener::class,
+        ],
         // Registered::class => [
         //     SendEmailVerificationNotification::class,
         // ],
-        \Ant\Shopee\Events\ShopeeOrderStatusUpdated::class => [
-            \App\Listeners\ShopeeOrderStatusUpdateListener::class,
-        ],
     ];
 
     /**

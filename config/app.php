@@ -181,6 +181,7 @@ return [
         Ant\Subscription\ServiceProvider::class,
         Ant\Member\ServiceProvider::class,
         Ant\Booking\ServiceProvider::class,
+        Ant\Shopee\ServiceProvider::class,
 
         Addons\User\Providers\AddonServiceProvider::class,
         Addons\Subscription\Providers\AddonServiceProvider::class,
