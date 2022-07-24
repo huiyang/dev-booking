@@ -4,7 +4,9 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use App\Models\User;
+use Fusion\Models\Matrix;
 use App\Models\BookableResource;
+use Addons\Booking\Http\Resources\BookingResource;
 
 class BookableResourceTest extends TestCase
 {
@@ -47,5 +49,37 @@ class BookableResourceTest extends TestCase
         
         $booking = $resource->newBooking($user, $start, $end);
         $this->assertFalse($resource->isAvailableBetween($start, $end));
+    }
+
+    public function testInvalidEndTime()
+    {
+        $start = '2021-07-01 00:00:00';
+        $end = '2021-07-01 00:00:00';
+
+        $user = User::factory()->create();
+		$resource = BookableResource::factory()->create(['quantity' => 1]);
+        
+        $this->expectException(\Exception::class);
+
+        $booking = $resource->newBooking($user, $start, $end);
+    }
+
+    public function testState()
+    {
+        $start = '2021-07-01 00:00:00';
+        $end = '2021-07-03 00:00:00';
+
+        $user = User::factory()->create();
+        $matrix = Matrix::factory()->withBlueprint()->create();
+		$resource = BookableResource::factory()->create(['quantity' => 1]);
+        
+        $booking = $resource->newBooking($user, $start, $end);
+        
+        $this->assertEquals(\Ant\Booking\States\NewBooking::class, $booking->state->getValue());
+
+        $model = \Fusion\Services\Builders\Matrix::resolve($matrix->handle);
+        $booking->updateBookingDetail($model);
+
+        $this->assertEquals(\Ant\Booking\States\Booked::class, $booking->state->getValue());
     }
 }

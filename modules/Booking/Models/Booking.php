@@ -5,14 +5,34 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Ant\Booking\Models\Driver;
-use Ant\State\Traits\HasStates;
+// use Ant\State\Traits\HasStates;
 use Gabievi\Promocodes\Facades\Promocodes;
 use Gabievi\Promocodes\Exceptions\InvalidPromocodeException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\ModelStates\HasStates;
 
 class Booking extends \Rinvex\Bookings\Models\BookableBooking {
-    // use HasStates;
+    use HasStates;
+
+    protected $casts = [
+        'bookable_id' => 'integer',
+        'bookable_type' => 'string',
+        'customer_id' => 'integer',
+        'customer_type' => 'string',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
+        'price' => 'float',
+        'quantity' => 'integer',
+        'total_paid' => 'float',
+        'currency' => 'string',
+        'formula' => 'json',
+        'canceled_at' => 'datetime',
+        'options' => 'array',
+        'notes' => 'string',
+        'state' => \Ant\Booking\States\BookingState::class,
+    ];
 	
     protected $rules = [
         'bookable_id' => 'required|integer',
@@ -30,6 +50,16 @@ class Booking extends \Rinvex\Bookings\Models\BookableBooking {
         //'options' => 'nullable|array',
         'notes' => 'nullable|string|max:10000',
     ];
+
+	protected $appends = ['state_name'];
+
+    public function __construct(array $attributes = [])
+    {
+		parent::__construct($attributes);
+		$this->mergeRules([
+            'options' => 'nullable',
+		]);
+	}
 
     // protected function registerStates(): void
     // {
@@ -62,6 +92,10 @@ class Booking extends \Rinvex\Bookings\Models\BookableBooking {
 	// public function getPrice() {
 		
 	// }
+
+	public function scopeOldThanMinutes($builder, $minutes) {
+		$builder->where('created_at', '<', now()->subMinutes($minutes));
+	}
 	
 	public function scopeStartsBetweenOrEndsBetween(Builder $builder, string $startsAt = null, string $endsAt = null): Builder {
 		$builder->where(function($builder) use($startsAt, $endsAt) {
@@ -225,24 +259,35 @@ class Booking extends \Rinvex\Bookings\Models\BookableBooking {
 		
 		return $this;
 	}
-	
-	public function updateDriver($driver) {
-		if (is_object($driver)) {
-			// Assign new driver regardless booking have already associated with driver or not
-			$this->customer()->associate($driver)->save();
-		} else {
-			if (isset($this->customer)) {
-				// Booking associated with driver, update the driver
-				$this->customer->update($driver);
-			} else {
-				// Booking not associated with driver, create new driver
-				$this->customer()->associate(Driver::create($driver))->save();
-			}
-		}
+
+	public function updateBookingDetail($detail)
+	{
+		$this->detail()->associate($detail)->save();
+		$this->state->transitionTo(\Ant\Booking\States\Booked::class);
 	}
+	
+	// public function updateDriver($driver) {
+	// 	if (is_object($driver)) {
+	// 		// Assign new driver regardless booking have already associated with driver or not
+	// 		$this->customer()->associate($driver)->save();
+	// 	} else {
+	// 		if (isset($this->customer)) {
+	// 			// Booking associated with driver, update the driver
+	// 			$this->customer->update($driver);
+	// 		} else {
+	// 			// Booking not associated with driver, create new driver
+	// 			$this->customer()->associate(Driver::create($driver))->save();
+	// 		}
+	// 	}
+	// }
 	
 	public function getBasePrice() {
 		return $this->options['basePrice'];
+	}
+
+	public function getStateNameAttribute() 
+	{
+		return $this->state->name;
 	}
 	
 	public function getUnitPriceAttribute() {
@@ -274,9 +319,9 @@ class Booking extends \Rinvex\Bookings\Models\BookableBooking {
 		return $this->promoCodeDiscount;
 	}
 	
-	public function getPromoCodeDiscountAttribute() {
-		return $this->formula['promocode_discount'] ?? $this->calculatePromoCodeDiscount();
-	}
+	// public function getPromoCodeDiscountAttribute() {
+	// 	return $this->formula['promocode_discount'] ?? $this->calculatePromoCodeDiscount();
+	// }
 	
 	public function getCatalogDiscountAttribute() {
 		return $this->options->get('catalogDiscount');
@@ -294,41 +339,53 @@ class Booking extends \Rinvex\Bookings\Models\BookableBooking {
 		return $this->options['items'];
 	}
 	
-	public function updatePromoCode($promoCode) {
-		if ($promoCode) {
-			$validator = Validator::make(['promoCode' => $promoCode], [
-				'promoCode' => function($attribute, $value, $fail) {
-					try {
-						$promo = Promocodes::check($value);
-						if ($promo === false) throw new InvalidPromocodeException;
-					} catch (InvalidPromocodeException $ex) {
-						$fail('Invalid :attribute');
-					}
-				}
-			]);
+	// public function updatePromoCode($promoCode) {
+	// 	if ($promoCode) {
+	// 		$validator = Validator::make(['promoCode' => $promoCode], [
+	// 			'promoCode' => function($attribute, $value, $fail) {
+	// 				try {
+	// 					$promo = Promocodes::check($value);
+	// 					if ($promo === false) throw new InvalidPromocodeException;
+	// 				} catch (InvalidPromocodeException $ex) {
+	// 					$fail('Invalid :attribute');
+	// 				}
+	// 			}
+	// 		]);
 			
-			if ($validator->validate()) {
-				$this->options->set('promoCode', $promoCode);
-			}
-		} else {
-			// Valid to update promo code to empty - to clear the promo code
-			$this->options->forget('promoCode');
-		}
+	// 		if ($validator->validate()) {
+	// 			$this->options->set('promoCode', $promoCode);
+	// 		}
+	// 	} else {
+	// 		// Valid to update promo code to empty - to clear the promo code
+	// 		$this->options->forget('promoCode');
+	// 	}
 		
-		$this->price = null; // Need to clear the old price so that when save it will calculate the new price.
-	}
+	// 	$this->price = null; // Need to clear the old price so that when save it will calculate the new price.
+	// }
 	
-	public function pickupPoint() {
-		return $this->hasOneThrough('Ant\Booking\Models\MeetPoint', BookingDetail::class, 'booking_id', 'id', 'id', 'pickup_point_id');
-	}
+	// public function pickupPoint() {
+	// 	return $this->hasOneThrough('Ant\Booking\Models\MeetPoint', BookingDetail::class, 'booking_id', 'id', 'id', 'pickup_point_id');
+	// }
 	
-	public function dropoffPoint() {
-		return $this->hasOneThrough('Ant\Booking\Models\MeetPoint', BookingDetail::class, 'booking_id', 'id', 'id', 'dropoff_point_id');
-	}
+	// public function dropoffPoint() {
+	// 	return $this->hasOneThrough('Ant\Booking\Models\MeetPoint', BookingDetail::class, 'booking_id', 'id', 'id', 'dropoff_point_id');
+	// }
 	
-	public function detail() : HasOne {
-		return $this->hasOne(BookingDetail::class, 'booking_id');
-	}
+	// public function detail() : HasOne {
+	// 	return $this->hasOne(BookingDetail::class, 'booking_id');
+	// }
+	
+    public function detail(): MorphTo
+    {
+        return $this->morphTo('detail');
+    }
+
+	// public function getDetailAttribute()
+	// {
+	// 	$className = $this->detail_type;
+	// 	$id = $this->detail_id;
+	// 	return $className::find($id);
+	// }
 	
 	// protected function calculatePriceForProduct(Model $bookable, Carbon $startsAt, Carbon $endsAt = null, int $quantity = 1, $options = []) {
 	// 	if (isset($bookable->rates)) {
@@ -341,22 +398,22 @@ class Booking extends \Rinvex\Bookings\Models\BookableBooking {
 	// 	return $this->_calculatePrice($bookable, $startsAt, $endsAt, $quantity);
 	// }
 
-	protected function calculatePromoCodeDiscount() {
-		$discount = 0;
-		if (isset($this->options['promoCode'])) {
-			try {
-				$promo = Promocodes::check($this->options['promoCode']);
-				if ($promo) {
-					$discount += $promo->reward;
-				} else {
-					throw new InvalidPromocodeException;
-				}
-			} catch (InvalidPromocodeException $ex) {
-				unset($this->options['promoCode']);
-			}
-		}
-		return $discount;
-	}	
+	// protected function calculatePromoCodeDiscount() {
+	// 	$discount = 0;
+	// 	if (isset($this->options['promoCode'])) {
+	// 		try {
+	// 			$promo = Promocodes::check($this->options['promoCode']);
+	// 			if ($promo) {
+	// 				$discount += $promo->reward;
+	// 			} else {
+	// 				throw new InvalidPromocodeException;
+	// 			}
+	// 		} catch (InvalidPromocodeException $ex) {
+	// 			unset($this->options['promoCode']);
+	// 		}
+	// 	}
+	// 	return $discount;
+	// }	
 	
 	protected function calculatePriceForOptions($startsAt, $endsAt) {
 		$price = 0;

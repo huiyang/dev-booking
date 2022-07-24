@@ -26,7 +26,7 @@
     }
 
     public function subscriptions() {
-      return Subscription::where("owned_by", $this->id);
+      return $this->hasMany(Subscription::class, 'owned_by');
     }
 
     public function membershipSubscription() {

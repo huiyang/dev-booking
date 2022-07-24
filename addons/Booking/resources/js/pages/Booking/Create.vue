@@ -1,12 +1,12 @@
 <template>
     <div>
         <portal to="title">
-            <page-title icon="collection.icon || 'pencil-alt'" :subtitle="collection.name" v-if="collection">Booking</page-title>
+            <page-title :icon="collection.icon || 'pencil-alt'" :subtitle="entry.name" v-if="collection">Booking</page-title>
         </portal>
 
         <portal to="actions">
             <div>
-                <router-link :to="{ name: 'collection.index' }" class="button">Go back</router-link>
+                <router-link :to="{ name: 'bookable_collection.index' }" class="button">Go back</router-link>
                 <button class="button button--primary" @click="submit">Book</button>
             </div>
         </portal>
@@ -38,7 +38,11 @@ export default {
     methods: {
         submit() {
             this.form.post('/api/collection/' + this.collection.slug + '/' + this.entry.id + '/book').then((response) => {
-                
+                let bookingId = response.id
+                this.$router.push('/collection/resource/' + this.entry.id + '/' + bookingId + '/detail')
+                console.log('push to', '/collection/resource/' + this.entry.id + '/' + bookingId + '/detail')
+            }).catch((error) => {
+                toast(error.message, 'danger')
             })
         }
     },

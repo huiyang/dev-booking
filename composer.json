@@ -56,6 +56,7 @@
         "laravel/tinker": "^2.5",
         "predis/predis": "^1.1",
         "rinvex/laravel-bookings": "dev-master",
+        "spatie/laravel-model-states": "^2.4",
         "vemcogroup/laravel-sparkpost-driver": "^4.0"
     },
     "require-dev": {

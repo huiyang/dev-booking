@@ -31,6 +31,10 @@ trait Bookable {
 		$startsAt = new \Carbon\Carbon($startsAt);
 		$endsAt = new \Carbon\Carbon($endsAt);
 
+		if ($endsAt->lessThanOrEqualTo($startsAt)) {
+			throw new \Exception("End time should be greater than start time.");
+		}
+
         $booking = $this->bookings()->make([
             'bookable_id' => static::getKey(),
             'bookable_type' => static::getMorphClass(),
@@ -50,6 +54,19 @@ trait Bookable {
 
 		return $booking;
     }
+
+	public function deleteExpiredNotCompleteBooking() {
+		$this->bookings()->oldThanMinutes(10)
+			->where('state', \Ant\Booking\States\NewBooking::class)
+			->delete();
+	}
+
+	public function checkAvailabilityThenNewBooking(Model $customer, string $startsAt, string $endsAt, int $quantity =  1) {
+        if (!$this->isAvailableBetween($startsAt, $endsAt)) {
+            throw new \Exception('Not available');
+        }
+        return $this->newBooking($customer, $startsAt, $endsAt, $quantity);
+	}
     
     public function isAvailableBetween($startsAt, $endsAt) {
 		return static::availableBetween($startsAt, $endsAt)->where('id', $this->id)->count() > 0;
