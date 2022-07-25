@@ -17,7 +17,9 @@ class BookingController extends DataTableController {
         $matrix = Matrix::where('slug', $slug )->firstOrFail();
         $model = Builders\Matrix::resolve($matrix->handle);
 
-        return Booking::with('bookable', 'detail')->where('bookable_type', get_class($model))->where('bookable_id', $matrixId);
+        return Booking::with('bookable', 'detail')
+            ->whereBookedStateOnly()
+            ->where('bookable_type', get_class($model))->where('bookable_id', $matrixId);
     }
 
     public function getDisplayableColumns()

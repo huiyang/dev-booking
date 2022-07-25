@@ -1,6 +1,7 @@
 <?php
 namespace Ant\Booking\Traits;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Rinvex\Bookings\Models\BookableBooking;
@@ -68,12 +69,15 @@ trait Bookable {
         return $this->newBooking($customer, $startsAt, $endsAt, $quantity);
 	}
     
-    public function isAvailableBetween($startsAt, $endsAt) {
-		return static::availableBetween($startsAt, $endsAt)->where('id', $this->id)->count() > 0;
+    public function isAvailableBetween($startsAt, $endsAt, $excludeIds = [], $minimumGapInSeconds = 0) {
+		return static::availableBetween($startsAt, $endsAt, $excludeIds, $minimumGapInSeconds)->where('id', $this->id)->count() > 0;
 	}
 
-    public function scopeAvailableBetween($builder, $startsAt, $endsAt) {
-		$builder->notFullyBookedBetween($startsAt, $endsAt)
+    public function scopeAvailableBetween($builder, $startsAt, $endsAt, $excludeIds = [], $minimumGapInSeconds = 0) {
+		$startsAt = Carbon::parse($startsAt)->subSeconds($minimumGapInSeconds);
+		$endsAt = Carbon::parse($endsAt)->addSeconds($minimumGapInSeconds);
+
+		$builder->notFullyBookedBetween($startsAt, $endsAt, $excludeIds)
 			->notBlockedBetween($startsAt, $endsAt);
 	}
 
@@ -83,15 +87,16 @@ trait Bookable {
 		});
 	}
 	
-	public function scopeNotFullyBookedBetween($builder, $startsAt, $endsAt) {
-		return $builder->has('bookings', '<', DB::raw('`quantity`'), 'and', function($builder) use($startsAt, $endsAt)  {
-			$builder->startsBetweenOrEndsBetween($startsAt, $endsAt);
-		});
+	public function scopeNotFullyBookedBetween($builder, $startsAt, $endsAt, $excludeIds = []) {
+		return $builder->whereHas('bookings', function($builder) use($startsAt, $endsAt, $excludeIds)  {
+			$builder->startsAndEndsOverlappedWith($startsAt, $endsAt)
+				->whereNotIn('id', $excludeIds);
+		}, '<', DB::raw('`quantity`'));
 	}
 	
 	public function scopeNotBookedBetween($builder, $startsAt, $endsAt) {
 		return $builder->doesnthave('bookings', 'and', function($builder) use($startsAt, $endsAt)  {
-			$builder->startsBetweenOrEndsBetween($startsAt, $endsAt);
+			$builder->startsAndEndsOverlappedWith($startsAt, $endsAt);
 		});
 	}
 }

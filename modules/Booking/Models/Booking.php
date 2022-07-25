@@ -93,8 +93,17 @@ class Booking extends \Rinvex\Bookings\Models\BookableBooking {
 		
 	// }
 
+	public function scopeWhereBookedStateOnly($builder) {
+		$builder->where('state', \Ant\Booking\States\Booked::class);
+	}
+
 	public function scopeOldThanMinutes($builder, $minutes) {
 		$builder->where('created_at', '<', now()->subMinutes($minutes));
+	}
+
+	public function scopeStartsAndEndsOverlappedWith(Builder $builder, string $startsAt, string $endsAt) {
+		$builder->startsBefore($endsAt)
+			->endsAfter($startsAt);
 	}
 	
 	public function scopeStartsBetweenOrEndsBetween(Builder $builder, string $startsAt = null, string $endsAt = null): Builder {

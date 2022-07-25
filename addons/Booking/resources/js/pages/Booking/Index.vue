@@ -31,7 +31,14 @@
             <template slot="actions" slot-scope="table">
                 <ui-actions :id="'entry_' + table.record.id + '_actions'" :key="'entry_' + table.record.id + '_actions'">
                 
-                    <ui-dropdown-link :to="{ name: 'bookable_collection.edit', params: {collection: collection.slug, id: table.record.id} }">Edit</ui-dropdown-link>
+                    <ui-dropdown-link
+                        @click.prevent="loadBookingDetail(table.record.id)"
+                        v-modal:view-booking="table.record"
+                        >
+                        View Detail
+                    </ui-dropdown-link>
+
+                    <ui-dropdown-link :to="{ name: 'bookable_collection.booking.edit', params: {booking: table.record.id} }">Edit</ui-dropdown-link>
                     
                     <ui-dropdown-divider></ui-dropdown-divider>
 
@@ -54,6 +61,39 @@
                     <ui-button v-modal:delete-entry variant="secondary">Cancel</ui-button>
                 </template>
             </ui-modal>
+
+            <ui-modal name="view-booking" title="Booking Detail" key="view_booking">
+                <template slot-scope="entry" :loadingBooking="loadingBooking" :booking="booking">
+                    <div v-if="loadingBooking">
+                        Loading...
+                    </div>
+                    <div v-else-if="booking && booking.detail && booking.detail.entry && booking.detail.matrix">
+                        <div>
+                            <h3>{{ booking.bookable.name}}</h3>
+                        </div>
+                        <div class="flex flex-wrap mb-3">
+                            <div class="md:w-1/2 w-full">
+                                <ui-label>From</ui-label>
+                                <ui-datetime :timestamp="booking.starts_at"></ui-datetime>
+                            </div>
+                            <div class="md:w-1/2 w-full">
+                                <ui-label>To</ui-label>
+                                <ui-datetime :timestamp="booking.ends_at"></ui-datetime>
+                            </div>
+                        </div>
+                        <div v-for="section in booking.detail.matrix.blueprint.sections" :key="section.id">
+                            <div v-for="field in section.fields" :key="field.id">
+                                <ui-label>{{ field.name }}</ui-label>
+                                <div>{{ booking.detail.entry[field.handle] }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template slot="footer" slot-scope="entry">
+                    <ui-button v-modal:view-booking variant="secondary">Close</ui-button>
+                </template>
+            </ui-modal>
         </portal>
     </div>
 </template>
@@ -65,10 +105,24 @@ export default {
         return {
             collection: {},
             entry: {},
+            booking: null,
+            loadingBooking: false,
         }
     },
 
     methods: {
+        loadBookingDetail(id) {
+            this.loadingBooking = true
+            this.booking = null
+
+            axios.get('/api/booking/' + id).then((response) => {
+                this.loadingBooking = false
+                this.booking = response.data.data
+            }).catch((error) => {
+                this.loadingBooking = false
+                toast(error.response.data.message, 'error')
+            })
+        },
         destroy(id) {
             axios.delete('/api/booking/' + id).then((response) => {
                 toast('Booking successfully deleted.', 'success')

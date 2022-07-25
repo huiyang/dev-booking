@@ -39,6 +39,9 @@ export default {
             this.form.post('/api/booking/' + this.$route.params.booking + '/detail').then((response) => {
                 toast('Succesfully booked.', 'success')
                 this.gotoBookingList(this)
+            }).catch((error) => {
+                this.loading = false
+                toast(error.message, 'error')
             })
         },
         gotoBookingList(vm) {

@@ -13,6 +13,15 @@ window.Fusion.booting(function(Vue, router, store) {
             }
 		},
 		{
+			path: '/booking/:booking/edit',
+            component: () => import('./pages/BookingDetail/Edit'),
+            name: 'bookable_collection.booking.edit',
+            meta: {
+                requiresAuth: true,
+                layout: 'admin'
+            }
+		},
+		{
 			path: '/collection/:collection/:id/:booking/detail',
             component: () => import('./pages/BookingDetail/Create'),
             name: 'bookable_collection.booking.detail.create',
